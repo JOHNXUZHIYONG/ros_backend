@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>测试前后端数据交互</title>
+</head>
+<body>
+  <div>
+    用户名： <input type="text" id="name">
+    年龄： <input type="text" id="age">
+    <button onclick="insert_one()">添加信息</button>
+  </div>
+  <button onclick="fetch_one()">点击显示数据</button>
+    <div id="app"></div>
+    <script>
+        function fetch_one(){
+          console.log(123)
+            const requestOptions = {
+              method: "GET",
+              redirect: "follow"
+            };
+
+            fetch("http://127.0.0.1:8000/fetch_one/1", requestOptions)
+              .then((response) => response.text())
+              .then((result) => {
+                var data = JSON.parse(result)
+                // 在app里面压入元素
+                let son_div = document.createElement("div")
+                son_div.innerHTML = `${data["name"]} - ${data["age"]}`
+                var appE = document.getElementById("app")
+                appE.appendChild(son_div)
+                console.log(typeof(result))
+              })
+              .catch((error) => console.error(error));
+        }
+        function insert_one(){
+          const myHeaders = new Headers();
+            myHeaders.append("Content-Type", "application/json");
+            const name = document.getElementById("name").value
+            const age = document.getElementById("age").value
+            const raw = JSON.stringify({
+              "name": name,
+              "age": Number(age)
+            });
+
+            const requestOptions = {
+              method: "POST",
+              headers: myHeaders,
+              body: raw,
+              redirect: "follow"
+            };
+            console.log(raw)
+
+            fetch("http://127.0.0.1:8000/insert_one", requestOptions)
+              .then((response) => response.text())
+              .then((result) => {
+                const data = JSON.parse(result)["data"]
+                // 在app里面压入元素
+                let son_div = document.createElement("div")
+                son_div.innerHTML = `${data["name"]} - ${data["age"]}`
+                var appE = document.getElementById("app")
+                appE.appendChild(son_div)
+              })
+              .catch((error) => console.error(error));
+                    }
+    </script>
+</body>
+</html>
