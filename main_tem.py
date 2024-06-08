@@ -11,13 +11,13 @@ from pydantic import BaseModel
 app = FastAPI()
 
 # 允许所有源的跨域请求
-# app.add_middleware(
-#    CORSMiddleware,
-#    allow_origins=["*"],  # 或者["https://example.com"]等具体域名
-#    allow_credentials=True,
-#    allow_methods=["*"],  # 允许所有HTTP方法
-#    allow_headers=["*"],  # 允许所有请求头
-# )
+app.add_middleware(
+   CORSMiddleware,
+   allow_origins=["*"],  # 或者["https://example.com"]等具体域名
+   allow_credentials=True,
+   allow_methods=["*"],  # 允许所有HTTP方法
+   allow_headers=["*"],  # 允许所有请求头
+)
 
 # 创建对象的基类:
 Base = declarative_base()

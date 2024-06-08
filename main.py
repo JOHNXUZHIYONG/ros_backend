@@ -12,7 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 
 
-# database jslfjdljs
+# database
 
 DATABASE_URL = "mysql+pymysql://root:ROOT@127.0.0.1:3306/ros2"
 engine = create_engine(DATABASE_URL)
@@ -38,10 +38,24 @@ class A_ItemModel(Base):
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    
+class A_UserModel(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(String)
+    email = Column(String)
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 class ItemModel(BaseModel):
     name: str
     price: int
+
+class UserModel(BaseModel):
+    name: str
+    email: str
 
 app = FastAPI()
 
@@ -87,7 +101,7 @@ def hello():
     return {"message":"hello world"}
 
 # database crud
-@app.get("/get_item/{id}", response_model=dict , tags=["DATABASE"])
+@app.get("/get_item/{id}", response_model=dict , tags=["ITEM"])
 def get_item(id:int, session: Session = Depends(get_db)):
     item = session.query(A_ItemModel).filter_by(id=id).first()
     if not item:
@@ -95,7 +109,7 @@ def get_item(id:int, session: Session = Depends(get_db)):
     item = item.to_dict()
     return {"data": item}
 
-@app.post("/add_item" , tags=["DATABASE"])
+@app.post("/add_item" , tags=["ITEM"])
 def add_item(item: ItemModel, session: Session = Depends(get_db)):
     item = A_ItemModel(**dict(item))
     session.add(item)
@@ -103,7 +117,7 @@ def add_item(item: ItemModel, session: Session = Depends(get_db)):
     item = item.to_dict()
     return{"data": item}
 
-@app.delete("/delete_item/{id}" , tags=["DATABASE"])
+@app.delete("/delete_item/{id}" , tags=["ITEM"])
 def delete_item(id:int, session: Session = Depends(get_db)):
     item= session.query(A_ItemModel).filter_by(id=id).first()
     session.delete(item)
@@ -112,14 +126,51 @@ def delete_item(id:int, session: Session = Depends(get_db)):
 
     return {"data": item}
 
-@app.put("/update_item/{id}", tags=["DATABASE"])
+@app.put("/update_item/{id}", tags=["ITEM"])
 def update_item(id: int, sesseion: Session = Depends(get_db)):
     item = sesseion.query(A_ItemModel).filter_by(id=id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="item is not found")
     item.price = item.price+1
     sesseion.commit()
     item = item.to_dict()
     return {"data":item}
 
+@app.get("/get_user/{id}", tags=["USER"])
+def get_user(id:int, session: Session = Depends(get_db)):
+    user = session.query(A_UserModel).filter_by(id = id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="user is not found")
+    user = user.to_dict()
+    return {"data": user}
+
+@app.post("/add_user", tags=["USER"])
+def add_user(user:UserModel, session: Session = Depends(get_db)):
+    user = A_UserModel(**dict(user))
+    session.add(user)
+    session.commit()
+    user = user.to_dict()
+    return {"data": user}
+
+@app.delete("/delete_user/{id}", tags=["USER"])
+def delete_user(id:int, session:Session = Depends(get_db)):
+    user = session.query(A_UserModel).filter_by(id=id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="user is not found")
+    session.delete(user)
+    session.commit()
+    user = user.to_dict()
+    return {"data": user}
+
+@app.put("/update_user/{id}" , tags=["USER"])
+def update_user(id:int, session:Session = Depends(get_db)):
+    user = session.query(A_UserModel).filter_by(id=id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="user is not found")
+    user.email = user.email + "@"
+    session.commit()
+    user = user.to_dict()
+    return {"data": user}
     
 # pdf crud
 @app.post("/create_pdf/{id}" , tags=["PDF"])
