@@ -173,17 +173,17 @@ def update_user(id:int, session:Session = Depends(get_db)):
     return {"data": user}
     
 # pdf crud
-@app.post("/create_pdf/{id}" , tags=["PDF"])
-def create_pdf(id:int, content:str, pdf_generator: PDFGenerator = Depends(get_pdf_generator)):
-    pdf_generator.create_pdf(content)
-    return {"message": "Pdf created successfully", "file":pdf_generator.filename}
-
 @app.get("/get_pdf/{id}" , tags=["PDF"])
 def get_pdf(id:int, pdf_generator: PDFGenerator = Depends(get_pdf_generator)):
     
     if not os.path.exists(pdf_generator.filename):
         raise HTTPException(status_code=404, detail="PDF not found")
     return FileResponse(pdf_generator.filename, media_type='application/pdf', filename=f"document_{id}.pdf")
+
+@app.post("/add_pdf/{id}" , tags=["PDF"])
+def create_pdf(id:int, content:str, pdf_generator: PDFGenerator = Depends(get_pdf_generator)):
+    pdf_generator.create_pdf(content)
+    return {"message": "Pdf created successfully", "file":pdf_generator.filename}
 
 @app.delete("/delete_pdf/{id}" , tags=["PDF"])
 def delete_pdf(id:int, pdf_generator:PDFGenerator = Depends(get_pdf_generator)):
