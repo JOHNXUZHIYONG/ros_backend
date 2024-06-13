@@ -9,9 +9,6 @@ from sqlalchemy.orm import sessionmaker, Session
 from fastapi.middleware.cors import CORSMiddleware
 
 
-
-
-
 # database
 
 DATABASE_URL = "mysql+pymysql://root:ROOT@127.0.0.1:3306/ros2"
@@ -48,6 +45,18 @@ class A_UserModel(Base):
 
     def to_dict(self):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+    
+class A_InputsDataModel(Base):
+    __tablename__ = "report"
+
+    id = Column(Integer, primary_key=True, autoincrement=True )
+    use_case =Column(String)
+    task_size_value = Column(Integer)
+    bandwidth_value = Column(Integer)
+    email = Column(String)
+
+    def to_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
 class ItemModel(BaseModel):
     name: str
@@ -55,6 +64,12 @@ class ItemModel(BaseModel):
 
 class UserModel(BaseModel):
     name: str
+    email: str
+
+class InputsDataModel(BaseModel):
+    use_case: str
+    task_size_value: int
+    bandwidth_value: int
     email: str
 
 app = FastAPI()
@@ -74,6 +89,9 @@ app.add_middleware(
 Pdf_folder = "pdf_folder"
 
 os.makedirs(Pdf_folder,exist_ok=True)
+
+class PDFModel(BaseModel):
+    content: str
 
 class PDFGenerator:
     def __init__(self, file_name):
@@ -181,12 +199,14 @@ def get_pdf(id:int, pdf_generator: PDFGenerator = Depends(get_pdf_generator)):
     return FileResponse(pdf_generator.filename, media_type='application/pdf', filename=f"document_{id}.pdf")
 
 @app.post("/add_pdf/{id}" , tags=["PDF"])
-def create_pdf(id:int, content:str, pdf_generator: PDFGenerator = Depends(get_pdf_generator)):
-    pdf_generator.create_pdf(content)
+def create_pdf(id:int, pdf_content:PDFModel, pdf_generator: PDFGenerator = Depends(get_pdf_generator)):
+    
+    pdf_generator.create_pdf(pdf_content.content)
+    
     return {"message": "Pdf created successfully", "file":pdf_generator.filename}
 
 @app.delete("/delete_pdf/{id}" , tags=["PDF"])
-def delete_pdf(id:int, pdf_generator:PDFGenerator = Depends(get_pdf_generator)):
+def delete_pdf(id:int, pdf_generator:PDFGenerator = Depends(get_pdf_generator)): 
     
     if not os.path.exists(pdf_generator.filename):
         raise HTTPException(status_code=404, detail='file does not exist')
@@ -194,11 +214,19 @@ def delete_pdf(id:int, pdf_generator:PDFGenerator = Depends(get_pdf_generator)):
     return {"message":"pdf deleted successfully", "file": pdf_generator.filename}
 
 @app.put("/update_pdf/{id}" , tags=["PDF"])
-def update_pdf(id: int, content:str, pdf_generator: PDFGenerator = Depends(get_pdf_generator)):
+def update_pdf(id: int, pdf_content:PDFModel, pdf_generator: PDFGenerator = Depends(get_pdf_generator)):
     if not os.path.exists(pdf_generator.filename):
         raise HTTPException(status_code=404, detail="file is not found")
     pdf_generator.delete_pdf()
-    pdf_generator.create_pdf(content)
+    pdf_generator.create_pdf(pdf_content.content)
     return {"message":"you have updated the pdf", "file": pdf_generator.filename}
+
+@app.post("/add_inputs_data")
+def add_inputs_data(inputsDataModel:InputsDataModel, session: Session = Depends(get_db)):
+    inputsData = A_InputsDataModel(**dict(inputsDataModel)) 
+    session.add(inputsData)
+    session.commit()
+    inputsData = inputsData.to_dict()
+    return {"data": inputsData}
 
 
