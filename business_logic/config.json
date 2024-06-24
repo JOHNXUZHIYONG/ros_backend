@@ -1,0 +1,36 @@
+{
+  "mail": {
+    "USER": "mec.svs",
+    "EMAIL_DOMAIN": "modelfactory.sg",
+    "PASSWORD": "Exchange@2023",
+    "BODY_FILE": "email_body.html",
+    "HOST": "192.168.128.6",
+    "PORT": 465,
+    "SUBJECT": "Wireless Performance Analysis Report",
+    "REPORT_BASE_NAME": "report.pdf",
+    "CONTENT_TYPE": "html"
+  },
+  "network": {
+    "GLOB_PROTECT_NIC": "ens3"
+  },
+  "app": {
+    "download_route": "download_report",
+    "port": 8080
+  },
+  "plotting_utils": {
+    "eta_ee_vs_Pt_dBm_InFSL": "plot_eta_ee_vs_Pt_dBm_InFSL",
+    "eta_ee_vs_Pt_dBm_UMa": "plot_eta_ee_vs_Pt_dBm_UMa",
+    "eta_ee_vs_ra_InFSL": "plot_eta_ee_vs_ra_InFSL",
+    "eta_ee_vs_ra_UMa": "plot_eta_ee_vs_ra_UMa",
+    "latency_vs_K_size_InFSL": "plot_latency_vs_K_size_InFSL",
+    "latency_vs_K_size_UMa": "plot_latency_vs_K_size_UMa",
+    "latency_vs_ra_InFSL": "plot_latency_vs_ra_InFSL",
+    "latency_vs_ra_UMa": "plot_latency_vs_ra_UMa",
+    "throughput_vs_ra_InFSL": "plot_throughput_vs_ra_InFSL",
+    "throughput_vs_ra_UMa": "plot_throughput_vs_ra_UMa"
+  },
+  "file_types": {
+    "input_data": "mat",
+    "output_data": "jpg"
+  }
+}

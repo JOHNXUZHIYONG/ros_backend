@@ -3,7 +3,7 @@ from fastapi import FastAPI, Depends, HTTPException
 from fastapi.responses import FileResponse
 from fpdf import FPDF
 from pydantic import BaseModel
-from sqlalchemy import create_engine, Column, Integer, String
+from sqlalchemy import create_engine, Column, Integer, String, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from fastapi.middleware.cors import CORSMiddleware
@@ -47,12 +47,23 @@ class A_UserModel(Base):
         return {c.name: getattr(self, c.name) for c in self.__table__.columns}
     
 class A_InputsDataModel(Base):
-    __tablename__ = "report"
+    __tablename__ = "report_new"
 
     id = Column(Integer, primary_key=True, autoincrement=True )
     use_case =Column(String)
+    thrVsCommRadius=Column(Boolean)
+    effVsCommRadius=Column(Boolean)
+    effVsTxPower=Column(Boolean)
+    latVsCommRadius=Column(Boolean)
+    latVsTaskSize=Column(Boolean)
+
     task_size_value = Column(Integer)
     bandwidth_value = Column(Integer)
+    speed_value=Column(Integer)
+    hops_value=Column(Integer)
+    comm_rad_value=Column(Integer)
+    num_sam_value=Column(Integer)
+
     email = Column(String)
 
     def to_dict(self):
@@ -68,8 +79,19 @@ class UserModel(BaseModel):
 
 class InputsDataModel(BaseModel):
     use_case: str
+    thrVsCommRadius: bool
+    effVsCommRadius: bool
+    effVsTxPower: bool
+    latVsCommRadius: bool
+    latVsTaskSize: bool
+
     task_size_value: int
     bandwidth_value: int
+    speed_value: int
+    hops_value: int
+    comm_rad_value: int
+    num_sam_value: int
+
     email: str
 
 app = FastAPI()
@@ -223,10 +245,59 @@ def update_pdf(id: int, pdf_content:PDFModel, pdf_generator: PDFGenerator = Depe
 
 @app.post("/add_inputs_data")
 def add_inputs_data(inputsDataModel:InputsDataModel, session: Session = Depends(get_db)):
+    figure_names:list[str] = []
     inputsData = A_InputsDataModel(**dict(inputsDataModel)) 
     session.add(inputsData)
     session.commit()
     inputsData = inputsData.to_dict()
-    return {"data": inputsData}
+    return {"data": figure_names}
+
+    # flag = inputsData.get("use_case")
+
+    # for index, (key,value) in enumerate(inputsData.items()):
+    #     print(index, key, value)
+       
+    #     if value ==  True:
+    #         tem_key = ''
+
+    #         if flag == "indoor":
+    #             tem_key = key + "_InFSL"
+    #             figure_names.append(tem_key)
+    #         elif flag == "outdoor":
+    #             tem_key = key + "_UMa"
+    #             figure_names.append(tem_key)
+    #         else:
+    #             pass
+
+    # # get figure name if user wants figure to be plotted
+    #     figure_names.append(key) if value == True else print("")
+
+    # # figure_names = [figures for figures in list(inputsData) if figures.value()==True]
+    
+
+    
+
+    # # pipeline(form_data_list, email_address, input_variables)
+    # return {"data": figure_names}
+
+    # # input required: what plots the end user want to plot
+    # # what are the parameters he's passing in
+
+    # '''
+    # { "data": { "id": 2, "use_case": "indoor", \
+    #     "thrVsCommRadius": false, "effVsCommRadius": true, \
+    #         "effVsTxPower": true, "latVsCommRadius": false, \
+    #             "latVsTaskSize": false, "task_size_value": 10, \
+    #                 "bandwidth_value": 10, "speed_value": 20, \
+    #                     "hops_value": 5, "comm_rad_value": 100, "num_sam_value": 50, "email": "john@email" } }
+
+    # figure_names = []
+    # figure_names = data.get("...")
+
+    # figure_names: List[str],
+    # email_addresses: List[str],
+    # plot_parameters: Dict[str, List[float]]
+    # '''
+
 
 
