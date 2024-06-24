@@ -38,7 +38,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="D:\Python_project\newdemo\demo1\fastapi_test\venv"
+VIRTUAL_ENV="C:\Users\dmgadm\Desktop\ROS2_WP3.1\backend\ros_backend\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
